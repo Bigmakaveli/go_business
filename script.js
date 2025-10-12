@@ -1,209 +1,313 @@
-// Language translation functionality
+// Language translations
+const translations = {
+    he: {
+        since: "מאז 1993",
+        videoNotSupported: "הדפדפן שלך לא תומך בוידאו HTML.",
+        aboutTitle: "מי אנחנו",
+        aboutText: "חברת Go business שנוסדה בשנת 1993 מציעה מגוון רחב של שירותים עסקיים. החברה מעניקה לכם את ההזדמנות להשתתף בכל המכירות הפומביות של סחורות מגוונות מהנמל ישירות דרך זום. החברה מאפשרת לכם להירשם ולקנות סחורות מוחרמות ישירות. החברה נותנת הזדמנות למפעלים וחברות להציג את מוצריהם בפני המספר הגדול ביותר של סוחרים וחנויות המחפשים מקורות לרכישת סחורות.",
+        packagesTitle: "חבילות מנוי",
+        monthly: "חודשי",
+        threeMonths: "3 חודשים",
+        sixMonths: "6 חודשים",
+        yearly: "שנתי",
+        auctions: "מכירות פומביות",
+        confiscated: "סחורות מוחרמות",
+        productDisplay: "הצגת מוצרים",
+        contactTitle: "צור קשר",
+        send: "שלח",
+        allRights: "כל הזכויות שמורות"
+    },
+    ar: {
+        since: "منذ 1993",
+        videoNotSupported: "متصفحك لا يدعم فيديو HTML.",
+        aboutTitle: "من نحن",
+        aboutText: "شركه Go business التي تأسست سنه 1993 تقدم الشركه العديد من الخدمات التجاريه تقدم لكم الفرصه بلاشراك في كافه المزادات على بضائع متنوعه من الميناء بشكل مباشر عبر الزوم تقدم لكم امكانيه الاشتراك والشراء من البضائع المصادره بشكل مباشر اعطاء الفرصه للمصانع والشركات بعرض منتجاتهم على اكبر عدد من التجار والمحلات التجاريه التي تبحث عن مصادر لشراء البضائع",
+        packagesTitle: "باقات الاشتراك",
+        monthly: "شهري",
+        threeMonths: "3 شهور",
+        sixMonths: "6 شهور",
+        yearly: "سنة",
+        auctions: "المزادات",
+        confiscated: "البضائع المصادره",
+        productDisplay: "عرض منتجاتكم",
+        contactTitle: "تواصل معنا",
+        send: "إرسال",
+        allRights: "جميع الحقوق محفوظة"
+    },
+    en: {
+        since: "Since 1993",
+        videoNotSupported: "Your browser doesn't support HTML video.",
+        aboutTitle: "About Us",
+        aboutText: "Go Business company founded in 1993 offers many commercial services. The company gives you the opportunity to participate in all auctions on various goods from the port directly via Zoom. The company provides you with the possibility to subscribe and buy confiscated goods directly. Giving factories and companies the opportunity to display their products to the largest number of traders and commercial stores looking for sources to buy goods.",
+        packagesTitle: "Subscription Packages",
+        monthly: "Monthly",
+        threeMonths: "3 Months",
+        sixMonths: "6 Months",
+        yearly: "Yearly",
+        auctions: "Auctions",
+        confiscated: "Confiscated Goods",
+        productDisplay: "Product Display",
+        contactTitle: "Contact Us",
+        send: "Send",
+        allRights: "All rights reserved"
+    },
+    ru: {
+        since: "С 1993 года",
+        videoNotSupported: "Ваш браузер не поддерживает HTML видео.",
+        aboutTitle: "О нас",
+        aboutText: "Компания Go Business, основанная в 1993 году, предлагает множество коммерческих услуг. Компания предоставляет вам возможность участвовать во всех аукционах на различные товары из порта напрямую через Zoom. Компания предоставляет вам возможность подписаться и покупать конфискованные товары напрямую. Предоставление фабрикам и компаниям возможности демонстрировать свою продукцию наибольшему количеству торговцев и коммерческих магазинов, ищущих источники для покупки товаров.",
+        packagesTitle: "Пакеты подписки",
+        monthly: "Ежемесячно",
+        threeMonths: "3 месяца",
+        sixMonths: "6 месяцев",
+        yearly: "Годовой",
+        auctions: "Аукционы",
+        confiscated: "Конфискованные товары",
+        productDisplay: "Демонстрация продукции",
+        contactTitle: "Связаться с нами",
+        send: "Отправить",
+        allRights: "Все права защищены"
+    }
+};
+
+// Current language
+let currentLang = 'he';
+
+// Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    const languageButtons = document.querySelectorAll('.lang-btn');
-    const htmlElement = document.documentElement;
-    
-    // Language data
-    const translations = {
-        ar: {
-            dir: 'rtl',
-            lang: 'ar'
-        },
-        en: {
-            dir: 'ltr',
-            lang: 'en'
-        },
-        he: {
-            dir: 'rtl',
-            lang: 'he'
-        }
-    };
-    
-    // Initialize with Arabic (default)
-    setLanguage('ar');
-    
-    // Add click event listeners to language buttons
-    languageButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const selectedLang = this.getAttribute('data-lang');
-            setLanguage(selectedLang);
-        });
-    });
-    
-    function setLanguage(lang) {
-        // Update HTML attributes
-        htmlElement.setAttribute('dir', translations[lang].dir);
-        htmlElement.setAttribute('lang', translations[lang].lang);
-        
-        // Update active language button
-        languageButtons.forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.getAttribute('data-lang') === lang) {
-                btn.classList.add('active');
-            }
-        });
-        
-        // Update all translatable elements
-        updateTranslatableElements(lang);
-    }
-    
-    function updateTranslatableElements(lang) {
-        const translatableElements = document.querySelectorAll('[data-ar], [data-en], [data-he]');
-        
-        translatableElements.forEach(element => {
-            const translation = element.getAttribute(`data-${lang}`);
-            if (translation) {
-                element.textContent = translation;
-            }
-        });
-    }
-    
-    // Buy Now button functionality
-    const buyButtons = document.querySelectorAll('.buy-btn');
-    
-    buyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // For now, redirect to Google as requested
-            // Later this can be updated with actual payment links
-            window.open('https://google.com', '_blank');
-        });
-    });
-    
-    // Smooth scrolling for better UX
-    const links = document.querySelectorAll('a[href^="#"]');
-    
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href').substring(1);
-            const targetElement = document.getElementById(targetId);
-            
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
-    });
-    
-    // Add animation on scroll
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-    
-    // Observe elements for animation
-    const animatedElements = document.querySelectorAll('.package-card, .feature-card');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-    
-    // Add hover effects for package cards
-    const packageCards = document.querySelectorAll('.package-card');
-    
-    packageCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = this.classList.contains('featured') 
-                ? 'scale(1.05) translateY(-10px)' 
-                : 'translateY(-10px)';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = this.classList.contains('featured') 
-                ? 'scale(1.05)' 
-                : 'translateY(0)';
-        });
-    });
-    
-    // Add loading animation for buy buttons
-    buyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const originalText = this.textContent;
-            this.textContent = 'جاري التحميل...'; // Loading in Arabic
-            this.disabled = true;
-            
-            // Simulate loading time
-            setTimeout(() => {
-                this.textContent = originalText;
-                this.disabled = false;
-            }, 2000);
-        });
-    });
-    
-    // Add keyboard navigation support
-    document.addEventListener('keydown', function(e) {
-        if (e.altKey) {
-            switch(e.key) {
-                case '1':
-                    e.preventDefault();
-                    setLanguage('ar');
-                    break;
-                case '2':
-                    e.preventDefault();
-                    setLanguage('en');
-                    break;
-                case '3':
-                    e.preventDefault();
-                    setLanguage('he');
-                    break;
-            }
-        }
-    });
-    
-    // Add touch support for mobile
-    if ('ontouchstart' in window) {
-        const touchElements = document.querySelectorAll('.package-card, .feature-card');
-        
-        touchElements.forEach(element => {
-            element.addEventListener('touchstart', function() {
-                this.style.transform = 'scale(0.98)';
-            });
-            
-            element.addEventListener('touchend', function() {
-                this.style.transform = '';
-            });
-        });
-    }
-    
-    // WhatsApp button functionality
-    const whatsappBtn = document.getElementById('whatsappBtn');
-    const whatsappText = whatsappBtn.querySelector('.whatsapp-text');
-    
-    // Update WhatsApp button text on language change
-    function updateWhatsAppText(lang) {
-        const translations = {
-            ar: 'تواصل معنا',
-            en: 'Contact Us',
-            he: 'צור קשר'
-        };
-        whatsappText.textContent = translations[lang];
-    }
-    
-    // Call updateWhatsAppText when language changes
-    const originalSetLanguage = setLanguage;
-    setLanguage = function(lang) {
-        originalSetLanguage(lang);
-        updateWhatsAppText(lang);
-    };
-    
-    // Initialize WhatsApp text
-    updateWhatsAppText('ar');
-    
-    // Console welcome message
-    console.log('%cمرحباً بك في جو بزنس!', 'color: #65a30d; font-size: 20px; font-weight: bold;');
-    console.log('%cWelcome to Go Business!', 'color: #84cc16; font-size: 16px;');
-    console.log('%cברוכים הבאים ל-Go Business!', 'color: #25d366; font-size: 16px;');
+    initializeLanguage();
+    initializeGallery();
+    initializeContactForm();
 });
+
+// Language functionality
+function initializeLanguage() {
+    const langButtons = document.querySelectorAll('.lang-btn');
+    const mobileSelect = document.getElementById('mobile-lang-select');
+    
+    // Desktop language buttons
+    langButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const lang = this.getAttribute('data-lang');
+            switchLanguage(lang);
+        });
+    });
+    
+    // Mobile language dropdown
+    mobileSelect.addEventListener('change', function() {
+        switchLanguage(this.value);
+    });
+}
+
+function switchLanguage(lang) {
+    currentLang = lang;
+    
+    // Update active button
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('data-lang') === lang) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update mobile select
+    document.getElementById('mobile-lang-select').value = lang;
+    
+    // Update document direction
+    if (lang === 'ar' || lang === 'he') {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.documentElement.setAttribute('lang', lang);
+    } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.documentElement.setAttribute('lang', lang);
+    }
+    
+    // Translate all elements
+    translatePage(lang);
+}
+
+function translatePage(lang) {
+    const elements = document.querySelectorAll('[data-translate]');
+    elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+            element.textContent = translations[lang][key];
+        }
+    });
+    
+    // Update placeholders
+    const nameInput = document.getElementById('contactName');
+    const messageInput = document.getElementById('contactMessage');
+    
+    if (lang === 'he') {
+        nameInput.placeholder = 'השם';
+        messageInput.placeholder = 'ההודעה';
+    } else if (lang === 'ar') {
+        nameInput.placeholder = 'الاسم';
+        messageInput.placeholder = 'الرسالة';
+    } else if (lang === 'en') {
+        nameInput.placeholder = 'Name';
+        messageInput.placeholder = 'Message';
+    } else if (lang === 'ru') {
+        nameInput.placeholder = 'Имя';
+        messageInput.placeholder = 'Сообщение';
+    }
+}
+
+// Gallery functionality
+function initializeGallery() {
+    const slider = document.querySelector('.gallery-slider');
+    const track = document.getElementById('galleryTrack');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const indicators = document.getElementById('galleryIndicators');
+    
+    const images = track.querySelectorAll('.gallery-image');
+    
+    // Ensure images are loaded
+    images.forEach((img, index) => {
+        img.addEventListener('load', () => {
+            console.log(`Image ${index + 1} loaded successfully`);
+        });
+        img.addEventListener('error', () => {
+            console.error(`Failed to load image ${index + 1}:`, img.src);
+        });
+    });
+    
+    // Hide indicators for horizontal scroll layout
+    indicators.style.display = 'none';
+    
+    function scrollGallery(direction) {
+        const scrollAmount = 320; // Width of image + gap
+        const currentScroll = slider.scrollLeft;
+        
+        if (direction === 'next') {
+            slider.scrollTo({
+                left: currentScroll + scrollAmount,
+                behavior: 'smooth'
+            });
+        } else {
+            slider.scrollTo({
+                left: currentScroll - scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }
+    
+    // Event listeners for navigation buttons
+    nextBtn.addEventListener('click', () => scrollGallery('next'));
+    prevBtn.addEventListener('click', () => scrollGallery('prev'));
+    
+    // Touch/swipe support for mobile
+    let startX = 0;
+    let endX = 0;
+    
+    slider.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    });
+    
+    slider.addEventListener('touchend', (e) => {
+        endX = e.changedTouches[0].clientX;
+        handleSwipe();
+    });
+    
+    function handleSwipe() {
+        const threshold = 50;
+        const diff = startX - endX;
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                scrollGallery('next');
+            } else {
+                scrollGallery('prev');
+            }
+        }
+    }
+    
+    // Hide navigation buttons on mobile and show scrollbar
+    function handleResize() {
+        if (window.innerWidth <= 768) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            slider.style.overflowX = 'auto';
+        } else {
+            prevBtn.style.display = 'flex';
+            nextBtn.style.display = 'flex';
+            slider.style.overflowX = 'hidden';
+        }
+    }
+    
+    // Initial call
+    handleResize();
+    
+    // Listen for resize events
+    window.addEventListener('resize', handleResize);
+}
+
+// Contact form functionality
+function initializeContactForm() {
+    const form = document.getElementById('contactForm');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('contactName').value;
+        const message = document.getElementById('contactMessage').value;
+        
+        if (!name || !message) {
+            alert(currentLang === 'he' ? 'אנא מלא את כל השדות' : 
+                  currentLang === 'ar' ? 'يرجى ملء جميع الحقول' :
+                  currentLang === 'en' ? 'Please fill in all fields' :
+                  'Пожалуйста, заполните все поля');
+            return;
+        }
+        
+        // Create WhatsApp message
+        const whatsappMessage = `שלום, אני ${name}.\n${message}`;
+        const encodedMessage = encodeURIComponent(whatsappMessage);
+        
+        // WhatsApp API URL (you can replace with actual WhatsApp number)
+        const whatsappUrl = `https://wa.me/972501234567?text=${encodedMessage}`;
+        
+        // Open WhatsApp
+        window.open(whatsappUrl, '_blank');
+        
+        // Reset form
+        form.reset();
+        
+        // Show success message
+        const successMessage = currentLang === 'he' ? 'ההודעה נשלחה בהצלחה!' :
+                              currentLang === 'ar' ? 'تم إرسال الرسالة بنجاح!' :
+                              currentLang === 'en' ? 'Message sent successfully!' :
+                              'Сообщение отправлено успешно!';
+        
+        alert(successMessage);
+    });
+}
+
+// Smooth scrolling for better UX
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Header scroll effect
+window.addEventListener('scroll', function() {
+    const header = document.querySelector('.header');
+    if (window.scrollY > 100) {
+        header.style.background = 'rgba(255, 255, 255, 0.2)';
+    } else {
+        header.style.background = 'rgba(255, 255, 255, 0.1)';
+    }
+});
+
+// Initialize with Hebrew as default
+switchLanguage('he');
