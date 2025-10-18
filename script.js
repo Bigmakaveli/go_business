@@ -125,15 +125,8 @@ function switchLanguage(lang) {
     // Translate all elements
     translatePage(lang);
     
-    // Reinitialize gallery for RTL/LTR support with a small delay
-    setTimeout(() => {
-        // Reset gallery position to start
-        const galleryTrack = document.getElementById('galleryTrack');
-        if (galleryTrack) {
-            galleryTrack.style.transform = 'translateX(0px)';
-        }
-        initializeGallery();
-    }, 100);
+    // Smoothly handle gallery direction change without shaking
+    handleGalleryLanguageChange();
 }
 
 function translatePage(lang) {
@@ -161,6 +154,35 @@ function translatePage(lang) {
     } else if (lang === 'ru') {
         nameInput.placeholder = 'Имя';
         messageInput.placeholder = 'Сообщение';
+    }
+}
+
+function handleGalleryLanguageChange() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    const scrollbarThumb = document.getElementById('scrollbarThumb');
+    
+    if (!galleryTrack) return;
+    
+    // Check if we're on desktop (scrollbar exists)
+    const isDesktop = scrollbarThumb && document.querySelector('.scrollbar-track');
+    
+    if (isDesktop) {
+        // For desktop, smoothly transition to maintain current position
+        // Add a smooth transition class temporarily
+        galleryTrack.style.transition = 'transform 0.3s ease-out';
+        
+        // Use requestAnimationFrame to ensure smooth transition
+        requestAnimationFrame(() => {
+            // The gallery will maintain its current position
+            // The CSS already handles RTL/LTR properly with direction: ltr !important
+            // Remove the transition after it completes
+            setTimeout(() => {
+                galleryTrack.style.transition = 'transform 0.1s ease-out';
+            }, 300);
+        });
+    } else {
+        // For mobile, no special handling needed as it uses native scrolling
+        // The CSS already handles the direction properly
     }
 }
 
