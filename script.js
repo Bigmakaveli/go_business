@@ -125,8 +125,15 @@ function switchLanguage(lang) {
     // Translate all elements
     translatePage(lang);
     
-    // Update gallery direction
-    updateGalleryDirection();
+    // Reinitialize gallery for RTL/LTR support with a small delay
+    setTimeout(() => {
+        // Reset gallery position to start
+        const galleryTrack = document.getElementById('galleryTrack');
+        if (galleryTrack) {
+            galleryTrack.style.transform = 'translateX(0px)';
+        }
+        initializeGallery();
+    }, 100);
 }
 
 function translatePage(lang) {
@@ -224,222 +231,141 @@ window.addEventListener('scroll', function() {
 });
 
 // Gallery functionality
-let galleryState = {
-    currentIndex: 0,
-    isDragging: false,
-    startX: 0,
-    currentX: 0,
-    initialTransform: 0,
-    isTransitioning: false,
-    autoScrollPaused: false
-};
-
-function updateGalleryDirection() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    if (!galleryTrack) return;
-    
-    const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
-    
-    // Remove existing animation
-    galleryTrack.style.animation = 'none';
-    
-    // Force reflow
-    galleryTrack.offsetHeight;
-    
-    // Apply new animation based on direction
-    if (isRTL) {
-        galleryTrack.style.animation = 'autoScrollRTL 12s linear infinite';
-    } else {
-        galleryTrack.style.animation = 'autoScrollLTR 12s linear infinite';
-    }
-}
-
-function pauseAutoScroll() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    if (galleryTrack) {
-        galleryTrack.style.animationPlayState = 'paused';
-        galleryState.autoScrollPaused = true;
-    }
-}
-
-function resumeAutoScroll() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    if (galleryTrack) {
-        galleryTrack.style.animationPlayState = 'running';
-        galleryState.autoScrollPaused = false;
-    }
-}
-
-function moveToSlide(direction) {
-    const galleryTrack = document.getElementById('galleryTrack');
-    if (!galleryTrack || galleryState.isTransitioning) return;
-    
-    const items = galleryTrack.querySelectorAll('.gallery-item');
-    const totalItems = items.length / 2; // We have duplicates
-    const itemWidth = 420; // 400px + 20px gap
-    
-    pauseAutoScroll();
-    
-    if (direction === 'next') {
-        galleryState.currentIndex++;
-        if (galleryState.currentIndex >= totalItems) {
-            galleryState.currentIndex = 0;
-            // Reset position without animation for seamless loop
-            galleryTrack.style.transition = 'none';
-            updateTransform();
-            galleryTrack.offsetHeight;
-            galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        }
-    } else {
-        galleryState.currentIndex--;
-        if (galleryState.currentIndex < 0) {
-            galleryState.currentIndex = totalItems - 1;
-            // Reset position without animation for seamless loop
-            galleryTrack.style.transition = 'none';
-            updateTransform();
-            galleryTrack.offsetHeight;
-            galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        }
-    }
-    
-    galleryState.isTransitioning = true;
-    updateTransform();
-    
-    setTimeout(() => {
-        galleryState.isTransitioning = false;
-        // Resume auto-scroll after 3 seconds
-        setTimeout(resumeAutoScroll, 3000);
-    }, 500);
-}
-
-function updateTransform() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    if (!galleryTrack) return;
-    
-    const itemWidth = 420; // 400px + 20px gap
-    const translateX = -galleryState.currentIndex * itemWidth;
-    galleryTrack.style.transform = `translateX(${translateX}px)`;
-}
-
 function initializeGallery() {
     const galleryTrack = document.getElementById('galleryTrack');
+    const galleryWrapper = document.querySelector('.gallery-wrapper');
+    const scrollbarThumb = document.getElementById('scrollbarThumb');
+    const scrollbarTrack = document.querySelector('.scrollbar-track');
     
-    if (!galleryTrack) return;
+    if (!galleryTrack || !galleryWrapper) return;
     
-    // Initial setup
-    updateGalleryDirection();
+    // Check if we're on desktop (scrollbar exists)
+    const isDesktop = scrollbarThumb && scrollbarTrack;
     
-    // Mouse drag functionality
-    galleryTrack.addEventListener('mousedown', (e) => {
-        if (galleryState.isTransitioning) return;
-        
-        galleryState.isDragging = true;
-        galleryState.startX = e.clientX;
-        galleryState.initialTransform = -galleryState.currentIndex * 420;
-        pauseAutoScroll();
-        
-        galleryTrack.style.cursor = 'grabbing';
-        galleryTrack.style.transition = 'none';
-        
-        e.preventDefault();
-    });
+    if (isDesktop) {
+        initializeDesktopGallery();
+    } else {
+        initializeMobileGallery();
+    }
     
-    document.addEventListener('mousemove', (e) => {
-        if (!galleryState.isDragging) return;
+    function initializeDesktopGallery() {
+        const itemWidth = 400 + 20; // item width + gap
+        let currentPosition = 0;
+        const galleryWrapper = document.querySelector('.gallery-wrapper');
+        const wrapperWidth = galleryWrapper.offsetWidth;
+        const totalContentWidth = galleryTrack.children.length * itemWidth;
+        const maxPosition = Math.max(0, totalContentWidth - wrapperWidth);
         
-        galleryState.currentX = e.clientX;
-        const deltaX = galleryState.currentX - galleryState.startX;
-        const newTransform = galleryState.initialTransform + deltaX;
+        // Debug: Log dimensions to help troubleshoot
+        console.log('Gallery dimensions:', {
+            wrapperWidth,
+            totalContentWidth,
+            maxPosition,
+            itemCount: galleryTrack.children.length,
+            itemWidth
+        });
         
-        galleryTrack.style.transform = `translateX(${newTransform}px)`;
-    });
-    
-    document.addEventListener('mouseup', () => {
-        if (!galleryState.isDragging) return;
+        // Check if we're in RTL mode
+        const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
         
-        galleryState.isDragging = false;
-        galleryTrack.style.cursor = 'grab';
-        galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        // Ensure we don't exceed max position
+        currentPosition = Math.min(currentPosition, maxPosition);
         
-        const deltaX = galleryState.currentX - galleryState.startX;
-        const threshold = 420 * 0.3; // 30% of item width
+        // Scrollbar functionality
+        let isDragging = false;
+        let startX = 0;
+        let startLeft = 0;
         
-        if (Math.abs(deltaX) > threshold) {
-            if (deltaX > 0) {
-                moveToSlide('prev');
-            } else {
-                moveToSlide('next');
+        scrollbarThumb.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startLeft = currentPosition;
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const deltaX = e.clientX - startX;
+            const trackWidth = scrollbarTrack.offsetWidth;
+            const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
+            const maxThumbPosition = trackWidth - thumbWidth;
+            
+            // Calculate new position based on mouse movement (same for both RTL and LTR)
+            const thumbPosition = Math.max(0, Math.min(maxThumbPosition, 
+                (startLeft / maxPosition) * maxThumbPosition + deltaX));
+            const percentage = thumbPosition / maxThumbPosition;
+            currentPosition = Math.max(0, Math.min(maxPosition, percentage * maxPosition));
+            
+            updateGalleryPosition();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+        
+        // Scrollbar track click
+        scrollbarTrack.addEventListener('click', (e) => {
+            if (e.target === scrollbarTrack) {
+                const rect = scrollbarTrack.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const trackWidth = rect.width;
+                const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
+                const maxThumbPosition = trackWidth - thumbWidth;
+                
+                // Calculate position for thumb center (same for both RTL and LTR)
+                const thumbPosition = Math.max(0, Math.min(maxThumbPosition, 
+                    clickX - thumbWidth / 2));
+                
+                const percentage = thumbPosition / maxThumbPosition;
+                currentPosition = Math.max(0, Math.min(maxPosition, percentage * maxPosition));
+                
+                updateGalleryPosition();
             }
-        } else {
-            // Snap back to current position
-            updateTransform();
-            setTimeout(resumeAutoScroll, 2000);
+        });
+        
+        function updateGalleryPosition() {
+            // Clamp current position to valid range
+            currentPosition = Math.max(0, Math.min(currentPosition, maxPosition));
+            
+            // Move gallery to the left as we scroll (same for both RTL and LTR)
+            galleryTrack.style.transform = `translateX(-${currentPosition}px)`;
+            
+            // Update scrollbar thumb position (same for both RTL and LTR)
+            const trackWidth = scrollbarTrack.offsetWidth;
+            const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
+            const maxThumbPosition = trackWidth - thumbWidth;
+            const percentage = maxPosition > 0 ? currentPosition / maxPosition : 0;
+            const thumbPosition = percentage * maxThumbPosition;
+            
+            scrollbarThumb.style.width = `${thumbWidth}px`;
+            scrollbarThumb.style.left = `${thumbPosition}px`;
+            scrollbarThumb.style.right = 'auto';
+            
+            // Debug: Log current state
+            console.log('Gallery position:', {
+                currentPosition,
+                maxPosition,
+                percentage,
+                thumbPosition,
+                maxThumbPosition
+            });
         }
-    });
+        
+        // Initialize position
+        updateGalleryPosition();
+    }
     
-    // Touch functionality
-    galleryTrack.addEventListener('touchstart', (e) => {
-        if (galleryState.isTransitioning) return;
+    function initializeMobileGallery() {
+        // Mobile gallery - just enable smooth scrolling
+        galleryWrapper.style.overflowX = 'auto';
+        galleryWrapper.style.overflowY = 'hidden';
+        galleryWrapper.style.webkitOverflowScrolling = 'touch';
         
-        galleryState.isDragging = true;
-        galleryState.startX = e.touches[0].clientX;
-        galleryState.initialTransform = -galleryState.currentIndex * 420;
-        pauseAutoScroll();
-        
-        galleryTrack.style.transition = 'none';
-    }, { passive: false });
-    
-    galleryTrack.addEventListener('touchmove', (e) => {
-        if (!galleryState.isDragging) return;
-        
-        galleryState.currentX = e.touches[0].clientX;
-        const deltaX = galleryState.currentX - galleryState.startX;
-        const newTransform = galleryState.initialTransform + deltaX;
-        
-        galleryTrack.style.transform = `translateX(${newTransform}px)`;
-        e.preventDefault();
-    }, { passive: false });
-    
-    galleryTrack.addEventListener('touchend', () => {
-        if (!galleryState.isDragging) return;
-        
-        galleryState.isDragging = false;
-        galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        
-        const deltaX = galleryState.currentX - galleryState.startX;
-        const threshold = 420 * 0.3; // 30% of item width
-        
-        if (Math.abs(deltaX) > threshold) {
-            if (deltaX > 0) {
-                moveToSlide('prev');
-            } else {
-                moveToSlide('next');
-            }
-        } else {
-            // Snap back to current position
-            updateTransform();
-            setTimeout(resumeAutoScroll, 2000);
-        }
-    });
-    
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        
-        if (e.key === 'ArrowLeft') {
-            moveToSlide('prev');
-        } else if (e.key === 'ArrowRight') {
-            moveToSlide('next');
-        }
-    });
-    
-    // Hover pause functionality
-    galleryTrack.addEventListener('mouseenter', pauseAutoScroll);
-    galleryTrack.addEventListener('mouseleave', () => {
-        if (!galleryState.autoScrollPaused) {
-            resumeAutoScroll();
-        }
-    });
+        // Remove any desktop-specific styles
+        galleryTrack.style.transform = 'none';
+        galleryTrack.style.animation = 'none';
+    }
 }
 
 // Initialize with Hebrew as default
