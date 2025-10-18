@@ -18,6 +18,8 @@ const translations = {
         send: "שלח",
         allRights: "כל הזכויות שמורות",
         namePlaceholder: "השם",
+        businessDomainPlaceholder: "תחום העסק או התחום שבו אתם עוסקים",
+        businessDescriptionPlaceholder: "ספרו לנו קצת על העסק שלכם ומה אתם עושים",
         messagePlaceholder: "ההודעה",
         logoAlt: "לוגו Go Business",
         portViewAlt: "תצוגת נמל",
@@ -52,6 +54,8 @@ const translations = {
         send: "إرسال",
         allRights: "جميع الحقوق محفوظة",
         namePlaceholder: "الاسم",
+        businessDomainPlaceholder: "مجال مصلحتك أو المجال الذي تعمل فيه",
+        businessDescriptionPlaceholder: "أخبرنا قليلاً عن مصلحتك وما تقوم به",
         messagePlaceholder: "الرسالة",
         logoAlt: "شعار Go Business",
         portViewAlt: "منظر الميناء",
@@ -86,6 +90,8 @@ const translations = {
         send: "Send",
         allRights: "All rights reserved",
         namePlaceholder: "Name",
+        businessDomainPlaceholder: "Your business field or industry sector",
+        businessDescriptionPlaceholder: "Tell us a bit about your business and what you do",
         messagePlaceholder: "Message",
         logoAlt: "Go Business Logo",
         portViewAlt: "Port View",
@@ -120,6 +126,8 @@ const translations = {
         send: "Отправить",
         allRights: "Все права защищены",
         namePlaceholder: "Имя",
+        businessDomainPlaceholder: "Сфера вашего бизнеса или отрасль",
+        businessDescriptionPlaceholder: "Расскажите немного о вашем бизнесе и чем вы занимаетесь",
         messagePlaceholder: "Сообщение",
         logoAlt: "Логотип Go Business",
         portViewAlt: "Вид порта",
@@ -306,15 +314,26 @@ function initializeContactForm() {
         e.preventDefault();
         
         const name = document.getElementById('contactName').value;
+        const businessDomain = document.getElementById('businessDomain').value;
+        const businessDescription = document.getElementById('businessDescription').value;
         const message = document.getElementById('contactMessage').value;
         
-        if (!name || !message) {
+        if (!name || !businessDomain || !businessDescription || !message) {
             alert(translations[currentLang].fillAllFields);
             return;
         }
         
-        // Create WhatsApp message
-        const whatsappMessage = `שלום, אני ${name}.\n${message}`;
+        // Create WhatsApp message with all fields based on current language
+        let whatsappMessage;
+        if (currentLang === 'he') {
+            whatsappMessage = `שלום, אני ${name}.\nתחום העסק: ${businessDomain}\nעל העסק: ${businessDescription}\nהודעה: ${message}`;
+        } else if (currentLang === 'ar') {
+            whatsappMessage = `مرحبا، أنا ${name}.\nمجال العمل: ${businessDomain}\nعن العمل: ${businessDescription}\nالرسالة: ${message}`;
+        } else if (currentLang === 'en') {
+            whatsappMessage = `Hello, I am ${name}.\nBusiness Domain: ${businessDomain}\nAbout Business: ${businessDescription}\nMessage: ${message}`;
+        } else if (currentLang === 'ru') {
+            whatsappMessage = `Привет, я ${name}.\nСфера бизнеса: ${businessDomain}\nО бизнесе: ${businessDescription}\nСообщение: ${message}`;
+        }
         const encodedMessage = encodeURIComponent(whatsappMessage);
         
         // WhatsApp API URL (you can replace with actual WhatsApp number)

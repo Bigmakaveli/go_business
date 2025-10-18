@@ -104,7 +104,7 @@
             
             <!-- Video Section -->
             <div class="video-container">
-                <video controls class="main-video" poster="images/port.jpeg" preload="metadata">
+                <video controls class="main-video" poster="images/thumbnail.png" preload="metadata">
                     <source src="images/video.mp4" type="video/mp4">
                     <p data-translate="videoNotSupported">Your browser doesn't support HTML video.</p>
                 </video>
@@ -231,6 +231,12 @@
             <form class="contact-form" id="contactForm">
                 <div class="form-group">
                     <input type="text" id="contactName" placeholder="الاسم" required data-translate-placeholder="namePlaceholder">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="businessDomain" placeholder="مجال عملك" required data-translate-placeholder="businessDomainPlaceholder">
+                </div>
+                <div class="form-group">
+                    <textarea id="businessDescription" placeholder="القليل عن عملك" rows="3" required data-translate-placeholder="businessDescriptionPlaceholder"></textarea>
                 </div>
                 <div class="form-group">
                     <textarea id="contactMessage" placeholder="الرسالة" rows="5" required data-translate-placeholder="messagePlaceholder"></textarea>
