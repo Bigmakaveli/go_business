@@ -205,8 +205,8 @@ body {
 }
 
 .gallery-item {
-    flex: 0 0 300px;
-    height: 200px;
+    flex: 0 0 400px;
+    height: 280px;
     border-radius: 15px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -656,8 +656,8 @@ body {
     }
     
     .gallery-item {
-        flex: 0 0 250px;
-        height: 160px;
+        flex: 0 0 320px;
+        height: 200px;
     }
     
     .gallery-track {
@@ -737,8 +737,8 @@ body {
     
     /* Gallery responsive for small screens */
     .gallery-item {
-        flex: 0 0 200px;
-        height: 140px;
+        flex: 0 0 280px;
+        height: 180px;
     }
     
     .gallery-track {
