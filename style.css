@@ -311,24 +311,33 @@ body {
     display: block;
     border-radius: 15px;
     object-fit: cover;
+    background: #000;
 }
 
 .main-video::-webkit-media-controls-panel {
     background-color: rgba(0, 0, 0, 0.7);
 }
 
-/* Video placeholder fix for mobile */
-
-/* Ensure video shows placeholder on mobile */
+/* Video styling for mobile */
 @media (max-width: 768px) {
     .main-video {
         min-height: 200px;
-        background: transparent;
+        background: #000;
+        object-fit: contain;
     }
     
     .video-container {
         background: rgba(0, 0, 0, 0.1);
         border-radius: 15px;
+        position: relative;
+    }
+    
+    /* Ensure video poster shows on mobile */
+    .main-video[poster] {
+        background-image: url('images/port.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
 }
 

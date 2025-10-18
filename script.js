@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeLanguage();
     initializeContactForm();
     initializeGallery();
+    initializeVideo();
 });
 
 // Language functionality
@@ -652,6 +653,27 @@ function initializeGallery() {
         setTimeout(() => {
             startMobileAutoSlide();
         }, 1000);
+    }
+}
+
+// Video functionality
+function initializeVideo() {
+    const video = document.querySelector('.main-video');
+    if (!video) return;
+    
+    // Ensure video loads metadata on mobile
+    video.addEventListener('loadedmetadata', function() {
+        console.log('Video metadata loaded');
+    });
+    
+    // Handle video loading on mobile
+    video.addEventListener('loadstart', function() {
+        console.log('Video loading started');
+    });
+    
+    // Ensure poster is visible on mobile
+    if (window.innerWidth <= 768) {
+        video.load();
     }
 }
 
