@@ -156,7 +156,6 @@ function translatePage(lang) {
 
 // Gallery functionality
 function initializeGallery() {
-    const slider = document.querySelector('.gallery-slider');
     const track = document.getElementById('galleryTrack');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
@@ -164,84 +163,31 @@ function initializeGallery() {
     
     const images = track.querySelectorAll('.gallery-image');
     
+    console.log('Gallery initialized with', images.length, 'images');
+    
     // Ensure images are loaded
     images.forEach((img, index) => {
         img.addEventListener('load', () => {
-            console.log(`Image ${index + 1} loaded successfully`);
+            console.log(`Image ${index + 1} loaded successfully:`, img.src);
         });
         img.addEventListener('error', () => {
             console.error(`Failed to load image ${index + 1}:`, img.src);
         });
     });
     
-    // Hide indicators for horizontal scroll layout
+    // Hide navigation buttons and indicators since we're using auto-scroll
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
     indicators.style.display = 'none';
     
-    function scrollGallery(direction) {
-        const scrollAmount = 320; // Width of image + gap
-        const currentScroll = slider.scrollLeft;
-        
-        if (direction === 'next') {
-            slider.scrollTo({
-                left: currentScroll + scrollAmount,
-                behavior: 'smooth'
-            });
-        } else {
-            slider.scrollTo({
-                left: currentScroll - scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-    }
-    
-    // Event listeners for navigation buttons
-    nextBtn.addEventListener('click', () => scrollGallery('next'));
-    prevBtn.addEventListener('click', () => scrollGallery('prev'));
-    
-    // Touch/swipe support for mobile
-    let startX = 0;
-    let endX = 0;
-    
-    slider.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
+    // Pause animation on hover
+    track.addEventListener('mouseenter', () => {
+        track.style.animationPlayState = 'paused';
     });
     
-    slider.addEventListener('touchend', (e) => {
-        endX = e.changedTouches[0].clientX;
-        handleSwipe();
+    track.addEventListener('mouseleave', () => {
+        track.style.animationPlayState = 'running';
     });
-    
-    function handleSwipe() {
-        const threshold = 50;
-        const diff = startX - endX;
-        
-        if (Math.abs(diff) > threshold) {
-            if (diff > 0) {
-                scrollGallery('next');
-            } else {
-                scrollGallery('prev');
-            }
-        }
-    }
-    
-    // Hide navigation buttons on mobile and show scrollbar
-    function handleResize() {
-        if (window.innerWidth <= 768) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            slider.style.overflowX = 'auto';
-        } else {
-            prevBtn.style.display = 'flex';
-            nextBtn.style.display = 'flex';
-            slider.style.overflowX = 'hidden';
-        }
-    }
-    
-    // Initial call
-    handleResize();
-    
-    // Listen for resize events
-    window.addEventListener('resize', handleResize);
 }
 
 // Contact form functionality
@@ -311,3 +257,4 @@ window.addEventListener('scroll', function() {
 
 // Initialize with Hebrew as default
 switchLanguage('he');
+
