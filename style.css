@@ -575,13 +575,19 @@ body {
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .language-selector {
-        display: none;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .lang-btn {
+        padding: 6px 12px;
+        font-size: 12px;
     }
     
     .mobile-lang-dropdown {
-        display: block;
-        max-width: 150px;
-        margin: 0 auto;
+        display: none;
     }
     
     .header {
@@ -674,16 +680,13 @@ body {
 }
 
 @media (max-width: 480px) {
-    .mobile-lang-dropdown {
-        max-width: 130px;
+    .language-selector {
+        gap: 6px;
     }
     
-    .mobile-lang-dropdown select {
-        padding: 8px 10px;
-        font-size: 13px;
-        padding-right: 30px;
-        background-position: right 6px center;
-        background-size: 14px;
+    .lang-btn {
+        padding: 5px 10px;
+        font-size: 11px;
     }
     
     .header {
