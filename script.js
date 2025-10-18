@@ -271,6 +271,11 @@ function initializeGallery() {
         // Ensure we don't exceed max position
         currentPosition = Math.min(currentPosition, maxPosition);
         
+        // Auto-slide variables
+        let autoSlideInterval;
+        let slideDirection = 1; // 1 for forward, -1 for backward
+        let isUserInteracting = false;
+        
         // Scrollbar functionality
         let isDragging = false;
         let startX = 0;
@@ -278,8 +283,10 @@ function initializeGallery() {
         
         scrollbarThumb.addEventListener('mousedown', (e) => {
             isDragging = true;
+            isUserInteracting = true;
             startX = e.clientX;
             startLeft = currentPosition;
+            stopAutoSlide();
             e.preventDefault();
         });
         
@@ -302,11 +309,19 @@ function initializeGallery() {
         
         document.addEventListener('mouseup', () => {
             isDragging = false;
+            // Resume auto-slide after a delay when user stops interacting
+            setTimeout(() => {
+                isUserInteracting = false;
+                startAutoSlide();
+            }, 3000); // Wait 3 seconds before resuming
         });
         
         // Scrollbar track click
         scrollbarTrack.addEventListener('click', (e) => {
             if (e.target === scrollbarTrack) {
+                isUserInteracting = true;
+                stopAutoSlide();
+                
                 const rect = scrollbarTrack.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 const trackWidth = rect.width;
@@ -321,6 +336,12 @@ function initializeGallery() {
                 currentPosition = Math.max(0, Math.min(maxPosition, percentage * maxPosition));
                 
                 updateGalleryPosition();
+                
+                // Resume auto-slide after a delay
+                setTimeout(() => {
+                    isUserInteracting = false;
+                    startAutoSlide();
+                }, 3000);
             }
         });
         
@@ -352,8 +373,55 @@ function initializeGallery() {
             });
         }
         
+        // Auto-slide functions
+        function startAutoSlide() {
+            if (autoSlideInterval) return; // Already running
+            
+            autoSlideInterval = setInterval(() => {
+                if (isUserInteracting) return; // Don't slide if user is interacting
+                
+                // Move forward or backward based on direction
+                const slideAmount = 1; // Slow slide speed
+                currentPosition += slideDirection * slideAmount;
+                
+                // Check if we've reached the end and need to reverse direction
+                if (currentPosition >= maxPosition) {
+                    currentPosition = maxPosition;
+                    slideDirection = -1; // Start sliding backward
+                } else if (currentPosition <= 0) {
+                    currentPosition = 0;
+                    slideDirection = 1; // Start sliding forward
+                }
+                
+                updateGalleryPosition();
+            }, 50); // Update every 50ms for smooth animation
+        }
+        
+        function stopAutoSlide() {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = null;
+            }
+        }
+        
         // Initialize position
         updateGalleryPosition();
+        
+        // Start auto-slide
+        startAutoSlide();
+        
+        // Pause auto-slide on hover
+        galleryWrapper.addEventListener('mouseenter', () => {
+            isUserInteracting = true;
+            stopAutoSlide();
+        });
+        
+        galleryWrapper.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                isUserInteracting = false;
+                startAutoSlide();
+            }, 1000); // Wait 1 second before resuming
+        });
     }
     
     function initializeMobileGallery() {

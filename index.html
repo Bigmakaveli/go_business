@@ -90,16 +90,6 @@
         </div>
     </section>
 
-    <!-- Video Section -->
-    <section class="video-section">
-        <div class="video-container">
-            <video controls class="main-video">
-                <source src="images/video.mp4" type="video/mp4">
-                <p data-translate="video-not-supported">Your browser doesn't support HTML video.</p>
-            </video>
-        </div>
-    </section>
-
     <!-- About Section -->
     <section class="about-section">
         <h2 class="section-title" data-translate="about-title">מי אנחנו</h2>
@@ -217,19 +207,32 @@
         </div>
     </section>
 
-    <!-- Contact Form -->
-    <section class="contact-section">
-        <h2 class="section-title" data-translate="contact-title">تواصل معنا</h2>
-        <form class="contact-form" id="contactForm">
-            <div class="form-group">
-                <input type="text" id="contactName" placeholder="الاسم" required>
+    <!-- Contact and Video Container -->
+    <div class="contact-video-container">
+        <!-- Video Section -->
+        <section class="video-section">
+            <div class="video-container">
+                <video controls class="main-video">
+                    <source src="images/video.mp4" type="video/mp4">
+                    <p data-translate="video-not-supported">Your browser doesn't support HTML video.</p>
+                </video>
             </div>
-            <div class="form-group">
-                <textarea id="contactMessage" placeholder="الرسالة" rows="5" required></textarea>
-            </div>
-            <button type="submit" class="submit-btn" data-translate="send">إرسال</button>
-        </form>
-    </section>
+        </section>
+
+        <!-- Contact Form -->
+        <section class="contact-section">
+            <h2 class="section-title" data-translate="contact-title">تواصل معنا</h2>
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <input type="text" id="contactName" placeholder="الاسم" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="contactMessage" placeholder="الرسالة" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" data-translate="send">إرسال</button>
+            </form>
+        </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
