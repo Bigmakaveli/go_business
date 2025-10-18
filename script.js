@@ -13,9 +13,26 @@ const translations = {
         auctions: "מכירות פומביות",
         confiscated: "סחורות מוחרמות",
         productDisplay: "הצגת מוצרים",
+        banksTitle: "הבנקים הנתמכים",
         contactTitle: "צור קשר",
         send: "שלח",
-        allRights: "כל הזכויות שמורות"
+        allRights: "כל הזכויות שמורות",
+        namePlaceholder: "השם",
+        messagePlaceholder: "ההודעה",
+        logoAlt: "לוגו Go Business",
+        portViewAlt: "תצוגת נמל",
+        bankHapoalimAlt: "בנק הפועלים",
+        bankMarkantelAlt: "מרכנתיל",
+        bankWesternUnionAlt: "Western Union",
+        bankSendingAlt: "העברות",
+        bankMoneygramAlt: "MoneyGram",
+        bankHapoalimName: "בנק הפועלים",
+        bankMarkantelName: "מרכנתיל",
+        bankWesternUnionName: "Western Union",
+        bankSendingName: "העברות",
+        bankMoneygramName: "MoneyGram",
+        fillAllFields: "אנא מלא את כל השדות",
+        messageSentSuccess: "ההודעה נשלחה בהצלחה!"
     },
     ar: {
         since: "منذ 1993",
@@ -30,9 +47,26 @@ const translations = {
         auctions: "المزادات",
         confiscated: "البضائع المصادره",
         productDisplay: "عرض منتجاتكم",
+        banksTitle: "البنوك المدعومة",
         contactTitle: "تواصل معنا",
         send: "إرسال",
-        allRights: "جميع الحقوق محفوظة"
+        allRights: "جميع الحقوق محفوظة",
+        namePlaceholder: "الاسم",
+        messagePlaceholder: "الرسالة",
+        logoAlt: "شعار Go Business",
+        portViewAlt: "منظر الميناء",
+        bankHapoalimAlt: "بنك هبوعليم",
+        bankMarkantelAlt: "مركنتيل",
+        bankWesternUnionAlt: "ويسترن يونيون",
+        bankSendingAlt: "التحويلات",
+        bankMoneygramAlt: "مونيجرام",
+        bankHapoalimName: "بنك هبوعليم",
+        bankMarkantelName: "مركنتيل",
+        bankWesternUnionName: "ويسترن يونيون",
+        bankSendingName: "التحويلات",
+        bankMoneygramName: "مونيجرام",
+        fillAllFields: "يرجى ملء جميع الحقول",
+        messageSentSuccess: "تم إرسال الرسالة بنجاح!"
     },
     en: {
         since: "Since 1993",
@@ -47,9 +81,26 @@ const translations = {
         auctions: "Auctions",
         confiscated: "Confiscated Goods",
         productDisplay: "Product Display",
+        banksTitle: "Supported Banks",
         contactTitle: "Contact Us",
         send: "Send",
-        allRights: "All rights reserved"
+        allRights: "All rights reserved",
+        namePlaceholder: "Name",
+        messagePlaceholder: "Message",
+        logoAlt: "Go Business Logo",
+        portViewAlt: "Port View",
+        bankHapoalimAlt: "Bank Hapoalim",
+        bankMarkantelAlt: "Markantel",
+        bankWesternUnionAlt: "Western Union",
+        bankSendingAlt: "Money Transfers",
+        bankMoneygramAlt: "MoneyGram",
+        bankHapoalimName: "Bank Hapoalim",
+        bankMarkantelName: "Markantel",
+        bankWesternUnionName: "Western Union",
+        bankSendingName: "Money Transfers",
+        bankMoneygramName: "MoneyGram",
+        fillAllFields: "Please fill in all fields",
+        messageSentSuccess: "Message sent successfully!"
     },
     ru: {
         since: "С 1993 года",
@@ -64,9 +115,26 @@ const translations = {
         auctions: "Аукционы",
         confiscated: "Конфискованные товары",
         productDisplay: "Демонстрация продукции",
+        banksTitle: "Поддерживаемые банки",
         contactTitle: "Связаться с нами",
         send: "Отправить",
-        allRights: "Все права защищены"
+        allRights: "Все права защищены",
+        namePlaceholder: "Имя",
+        messagePlaceholder: "Сообщение",
+        logoAlt: "Логотип Go Business",
+        portViewAlt: "Вид порта",
+        bankHapoalimAlt: "Банк Хапоалим",
+        bankMarkantelAlt: "Маркантель",
+        bankWesternUnionAlt: "Вестерн Юнион",
+        bankSendingAlt: "Денежные переводы",
+        bankMoneygramAlt: "Монейграм",
+        bankHapoalimName: "Банк Хапоалим",
+        bankMarkantelName: "Маркантель",
+        bankWesternUnionName: "Вестерн Юнион",
+        bankSendingName: "Денежные переводы",
+        bankMoneygramName: "Монейграм",
+        fillAllFields: "Пожалуйста, заполните все поля",
+        messageSentSuccess: "Сообщение отправлено успешно!"
     }
 };
 
@@ -138,22 +206,64 @@ function translatePage(lang) {
         }
     });
     
+    // Update alt attributes
+    const altElements = document.querySelectorAll('[data-translate-alt]');
+    altElements.forEach(element => {
+        const key = element.getAttribute('data-translate-alt');
+        if (translations[lang] && translations[lang][key]) {
+            element.alt = translations[lang][key];
+        }
+    });
+    
     // Update placeholders
-    const nameInput = document.getElementById('contactName');
-    const messageInput = document.getElementById('contactMessage');
+    const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+    placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+            element.placeholder = translations[lang][key];
+        }
+    });
+    
+    // Update meta tags
+    updateMetaTags(lang);
+}
+
+function updateMetaTags(lang) {
+    const title = document.querySelector('title');
+    const description = document.querySelector('meta[name="description"]');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+    const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+    const twitterDescription = document.querySelector('meta[property="twitter:description"]');
     
     if (lang === 'he') {
-        nameInput.placeholder = 'השם';
-        messageInput.placeholder = 'ההודעה';
+        title.textContent = 'Go Business - מאז 1993';
+        description.content = 'Go Business - חברה שנוסדה בשנת 1993 מציעה מגוון רחב של שירותים עסקיים';
+        ogTitle.content = 'Go Business - מי אנחנו';
+        ogDescription.content = 'Go Business - חברה שנוסדה בשנת 1993 מציעה מגוון רחב של שירותים עסקיים';
+        twitterTitle.content = 'Go Business - מי אנחנו';
+        twitterDescription.content = 'Go Business - חברה שנוסדה בשנת 1993 מציעה מגוון רחב של שירותים עסקיים';
     } else if (lang === 'ar') {
-        nameInput.placeholder = 'الاسم';
-        messageInput.placeholder = 'الرسالة';
+        title.textContent = 'Go Business - منذ 1993';
+        description.content = 'Go Business - شركة تأسست سنة 1993 تقدم خدمات تجارية متنوعة';
+        ogTitle.content = 'Go Business - قصتنا';
+        ogDescription.content = 'Go Business - شركة تأسست سنة 1993 تقدم خدمات تجارية متنوعة';
+        twitterTitle.content = 'Go Business - قصتنا';
+        twitterDescription.content = 'Go Business - شركة تأسست سنة 1993 تقدم خدمات تجارية متنوعة';
     } else if (lang === 'en') {
-        nameInput.placeholder = 'Name';
-        messageInput.placeholder = 'Message';
+        title.textContent = 'Go Business - Since 1993';
+        description.content = 'Go Business - Company founded in 1993 offering diverse commercial services';
+        ogTitle.content = 'Go Business - About Us';
+        ogDescription.content = 'Go Business - Company founded in 1993 offering diverse commercial services';
+        twitterTitle.content = 'Go Business - About Us';
+        twitterDescription.content = 'Go Business - Company founded in 1993 offering diverse commercial services';
     } else if (lang === 'ru') {
-        nameInput.placeholder = 'Имя';
-        messageInput.placeholder = 'Сообщение';
+        title.textContent = 'Go Business - С 1993 года';
+        description.content = 'Go Business - Компания, основанная в 1993 году, предлагает разнообразные коммерческие услуги';
+        ogTitle.content = 'Go Business - О нас';
+        ogDescription.content = 'Go Business - Компания, основанная в 1993 году, предлагает разнообразные коммерческие услуги';
+        twitterTitle.content = 'Go Business - О нас';
+        twitterDescription.content = 'Go Business - Компания, основанная в 1993 году, предлагает разнообразные коммерческие услуги';
     }
 }
 
@@ -198,10 +308,7 @@ function initializeContactForm() {
         const message = document.getElementById('contactMessage').value;
         
         if (!name || !message) {
-            alert(currentLang === 'he' ? 'אנא מלא את כל השדות' : 
-                  currentLang === 'ar' ? 'يرجى ملء جميع الحقول' :
-                  currentLang === 'en' ? 'Please fill in all fields' :
-                  'Пожалуйста, заполните все поля');
+            alert(translations[currentLang].fillAllFields);
             return;
         }
         
@@ -219,12 +326,7 @@ function initializeContactForm() {
         form.reset();
         
         // Show success message
-        const successMessage = currentLang === 'he' ? 'ההודעה נשלחה בהצלחה!' :
-                              currentLang === 'ar' ? 'تم إرسال الرسالة بنجاح!' :
-                              currentLang === 'en' ? 'Message sent successfully!' :
-                              'Сообщение отправлено успешно!';
-        
-        alert(successMessage);
+        alert(translations[currentLang].messageSentSuccess);
     });
 }
 
@@ -277,15 +379,6 @@ function initializeGallery() {
         const wrapperWidth = galleryWrapper.offsetWidth;
         const totalContentWidth = galleryTrack.children.length * itemWidth;
         const maxPosition = Math.max(0, totalContentWidth - wrapperWidth);
-        
-        // Debug: Log dimensions to help troubleshoot
-        console.log('Gallery dimensions:', {
-            wrapperWidth,
-            totalContentWidth,
-            maxPosition,
-            itemCount: galleryTrack.children.length,
-            itemWidth
-        });
         
         // Check if we're in RTL mode
         const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
@@ -385,14 +478,6 @@ function initializeGallery() {
             scrollbarThumb.style.left = `${thumbPosition}px`;
             scrollbarThumb.style.right = 'auto';
             
-            // Debug: Log current state
-            console.log('Gallery position:', {
-                currentPosition,
-                maxPosition,
-                percentage,
-                thumbPosition,
-                maxThumbPosition
-            });
         }
         
         // Auto-slide functions

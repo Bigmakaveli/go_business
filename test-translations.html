@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .lang-btn { margin: 5px; padding: 10px; cursor: pointer; }
+        .lang-btn.active { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Translation Test</h1>
+    
+    <div>
+        <button class="lang-btn active" data-lang="he">עברית</button>
+        <button class="lang-btn" data-lang="ar">العربية</button>
+        <button class="lang-btn" data-lang="en">English</button>
+        <button class="lang-btn" data-lang="ru">Русский</button>
+    </div>
+    
+    <div class="test-section">
+        <h2 data-translate="aboutTitle">מי אנחנו</h2>
+        <p data-translate="aboutText">About text here</p>
+    </div>
+    
+    <div class="test-section">
+        <h2 data-translate="packagesTitle">باقات الاشتراك</h2>
+        <p data-translate="monthly">شهري</p>
+    </div>
+    
+    <div class="test-section">
+        <h2 data-translate="banksTitle">البنوك المدعومة</h2>
+        <p data-translate="bankHapoalimName">בנק הפועלים</p>
+    </div>
+    
+    <div class="test-section">
+        <h2 data-translate="contactTitle">تواصل معنا</h2>
+        <p data-translate="send">إرسال</p>
+    </div>
+    
+    <div class="test-section">
+        <p data-translate="since">Since 1993</p>
+        <p data-translate="allRights">جميع الحقوق محفوظة</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
