@@ -665,7 +665,11 @@ body {
     }
     
     .main-section {
-        padding: 80px 15px 30px;
+        padding: 60px 15px 20px;
+        min-height: 40vh;
+        background-size: cover;
+        background-position: center center;
+        background-attachment: scroll;
     }
 }
 
@@ -693,6 +697,7 @@ body {
     
     .since-text {
         font-size: 1rem;
+        padding: 6px 12px;
     }
     
     .logo-container {
