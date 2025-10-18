@@ -76,8 +76,8 @@ let currentLang = 'he';
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     initializeLanguage();
-    initializeGallery();
     initializeContactForm();
+    initializeGallery();
 });
 
 // Language functionality
@@ -124,6 +124,9 @@ function switchLanguage(lang) {
     
     // Translate all elements
     translatePage(lang);
+    
+    // Update gallery direction
+    updateGalleryDirection();
 }
 
 function translatePage(lang) {
@@ -154,41 +157,6 @@ function translatePage(lang) {
     }
 }
 
-// Gallery functionality
-function initializeGallery() {
-    const track = document.getElementById('galleryTrack');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const indicators = document.getElementById('galleryIndicators');
-    
-    const images = track.querySelectorAll('.gallery-image');
-    
-    console.log('Gallery initialized with', images.length, 'images');
-    
-    // Ensure images are loaded
-    images.forEach((img, index) => {
-        img.addEventListener('load', () => {
-            console.log(`Image ${index + 1} loaded successfully:`, img.src);
-        });
-        img.addEventListener('error', () => {
-            console.error(`Failed to load image ${index + 1}:`, img.src);
-        });
-    });
-    
-    // Hide navigation buttons and indicators since we're using auto-scroll
-    prevBtn.style.display = 'none';
-    nextBtn.style.display = 'none';
-    indicators.style.display = 'none';
-    
-    // Pause animation on hover
-    track.addEventListener('mouseenter', () => {
-        track.style.animationPlayState = 'paused';
-    });
-    
-    track.addEventListener('mouseleave', () => {
-        track.style.animationPlayState = 'running';
-    });
-}
 
 // Contact form functionality
 function initializeContactForm() {
@@ -254,6 +222,45 @@ window.addEventListener('scroll', function() {
         header.style.background = 'rgba(255, 255, 255, 0.1)';
     }
 });
+
+// Gallery functionality
+function updateGalleryDirection() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    if (!galleryTrack) return;
+    
+    const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
+    
+    // Remove existing animation
+    galleryTrack.style.animation = 'none';
+    
+    // Force reflow
+    galleryTrack.offsetHeight;
+    
+    // Apply new animation based on direction
+    if (isRTL) {
+        galleryTrack.style.animation = 'autoScrollRTL 60s linear infinite';
+    } else {
+        galleryTrack.style.animation = 'autoScrollLTR 60s linear infinite';
+    }
+}
+
+function initializeGallery() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    
+    if (!galleryTrack) return;
+    
+    // Initial setup
+    updateGalleryDirection();
+    
+    // Optional: Add hover pause functionality
+    galleryTrack.addEventListener('mouseenter', () => {
+        galleryTrack.style.animationPlayState = 'paused';
+    });
+    
+    galleryTrack.addEventListener('mouseleave', () => {
+        galleryTrack.style.animationPlayState = 'running';
+    });
+}
 
 // Initialize with Hebrew as default
 switchLanguage('he');
