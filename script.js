@@ -447,7 +447,7 @@ function initializeGallery() {
     }
     
     function initializeMobileGallery() {
-        // Mobile gallery - just enable smooth scrolling
+        // Mobile gallery with auto-slide functionality
         galleryWrapper.style.overflowX = 'auto';
         galleryWrapper.style.overflowY = 'hidden';
         galleryWrapper.style.webkitOverflowScrolling = 'touch';
@@ -455,6 +455,118 @@ function initializeGallery() {
         // Remove any desktop-specific styles
         galleryTrack.style.transform = 'none';
         galleryTrack.style.animation = 'none';
+        
+        // Mobile auto-slide variables
+        let autoSlideInterval;
+        let slideDirection = 1; // 1 for forward, -1 for backward
+        let isUserInteracting = false;
+        let currentScrollPosition = 0;
+        
+        // Calculate mobile dimensions
+        const itemWidth = 320 + 15; // mobile item width + gap
+        const totalContentWidth = galleryTrack.children.length * itemWidth;
+        const wrapperWidth = galleryWrapper.offsetWidth;
+        const maxScrollPosition = Math.max(0, totalContentWidth - wrapperWidth);
+        
+        // Auto-slide functions for mobile
+        function startMobileAutoSlide() {
+            if (autoSlideInterval) return; // Already running
+            
+            autoSlideInterval = setInterval(() => {
+                if (isUserInteracting) return; // Don't slide if user is interacting
+                
+                // Move forward or backward based on direction
+                const slideAmount = 2; // Mobile slide speed
+                currentScrollPosition += slideDirection * slideAmount;
+                
+                // Check if we've reached the end and need to reverse direction
+                if (currentScrollPosition >= maxScrollPosition) {
+                    currentScrollPosition = maxScrollPosition;
+                    slideDirection = -1; // Start sliding backward
+                } else if (currentScrollPosition <= 0) {
+                    currentScrollPosition = 0;
+                    slideDirection = 1; // Start sliding forward
+                }
+                
+                // Smooth scroll to new position
+                galleryWrapper.scrollTo({
+                    left: currentScrollPosition,
+                    behavior: 'smooth'
+                });
+            }, 100); // Update every 100ms for mobile
+        }
+        
+        function stopMobileAutoSlide() {
+            if (autoSlideInterval) {
+                clearInterval(autoSlideInterval);
+                autoSlideInterval = null;
+            }
+        }
+        
+        // Touch interaction handling
+        let touchStartX = 0;
+        let touchStartScrollLeft = 0;
+        let isDragging = false;
+        
+        galleryWrapper.addEventListener('touchstart', (e) => {
+            isUserInteracting = true;
+            stopMobileAutoSlide();
+            touchStartX = e.touches[0].clientX;
+            touchStartScrollLeft = galleryWrapper.scrollLeft;
+            isDragging = true;
+        });
+        
+        galleryWrapper.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            // Allow default touch scrolling behavior
+        });
+        
+        galleryWrapper.addEventListener('touchend', () => {
+            isDragging = false;
+            // Resume auto-slide after a delay when user stops interacting
+            setTimeout(() => {
+                isUserInteracting = false;
+                // Update current position based on actual scroll position
+                currentScrollPosition = galleryWrapper.scrollLeft;
+                startMobileAutoSlide();
+            }, 2000); // Wait 2 seconds before resuming
+        });
+        
+        // Mouse interaction handling for mobile (if mouse is used)
+        galleryWrapper.addEventListener('mousedown', () => {
+            isUserInteracting = true;
+            stopMobileAutoSlide();
+        });
+        
+        galleryWrapper.addEventListener('mouseup', () => {
+            setTimeout(() => {
+                isUserInteracting = false;
+                currentScrollPosition = galleryWrapper.scrollLeft;
+                startMobileAutoSlide();
+            }, 2000);
+        });
+        
+        // Pause auto-slide on hover (for devices that support hover)
+        galleryWrapper.addEventListener('mouseenter', () => {
+            isUserInteracting = true;
+            stopMobileAutoSlide();
+        });
+        
+        galleryWrapper.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                isUserInteracting = false;
+                currentScrollPosition = galleryWrapper.scrollLeft;
+                startMobileAutoSlide();
+            }, 1000);
+        });
+        
+        // Initialize position
+        currentScrollPosition = 0;
+        
+        // Start auto-slide after a short delay
+        setTimeout(() => {
+            startMobileAutoSlide();
+        }, 1000);
     }
 }
 
