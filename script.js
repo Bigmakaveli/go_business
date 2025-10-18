@@ -238,9 +238,9 @@ function updateGalleryDirection() {
     
     // Apply new animation based on direction
     if (isRTL) {
-        galleryTrack.style.animation = 'autoScrollRTL 60s linear infinite';
+        galleryTrack.style.animation = 'autoScrollRTL 12s linear infinite';
     } else {
-        galleryTrack.style.animation = 'autoScrollLTR 60s linear infinite';
+        galleryTrack.style.animation = 'autoScrollLTR 12s linear infinite';
     }
 }
 

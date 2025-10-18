@@ -253,7 +253,7 @@ body {
 }
 
 .gallery-track {
-    animation: autoScrollLTR 60s linear infinite;
+    animation: autoScrollLTR 12s linear infinite;
 }
 
 .gallery-track:hover {
@@ -262,7 +262,7 @@ body {
 
 /* RTL support */
 [dir="rtl"] .gallery-track {
-    animation: autoScrollRTL 60s linear infinite;
+    animation: autoScrollRTL 12s linear infinite;
 }
 
 /* Video Section */
