@@ -224,6 +224,16 @@ window.addEventListener('scroll', function() {
 });
 
 // Gallery functionality
+let galleryState = {
+    currentIndex: 0,
+    isDragging: false,
+    startX: 0,
+    currentX: 0,
+    initialTransform: 0,
+    isTransitioning: false,
+    autoScrollPaused: false
+};
+
 function updateGalleryDirection() {
     const galleryTrack = document.getElementById('galleryTrack');
     if (!galleryTrack) return;
@@ -244,6 +254,73 @@ function updateGalleryDirection() {
     }
 }
 
+function pauseAutoScroll() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    if (galleryTrack) {
+        galleryTrack.style.animationPlayState = 'paused';
+        galleryState.autoScrollPaused = true;
+    }
+}
+
+function resumeAutoScroll() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    if (galleryTrack) {
+        galleryTrack.style.animationPlayState = 'running';
+        galleryState.autoScrollPaused = false;
+    }
+}
+
+function moveToSlide(direction) {
+    const galleryTrack = document.getElementById('galleryTrack');
+    if (!galleryTrack || galleryState.isTransitioning) return;
+    
+    const items = galleryTrack.querySelectorAll('.gallery-item');
+    const totalItems = items.length / 2; // We have duplicates
+    const itemWidth = 420; // 400px + 20px gap
+    
+    pauseAutoScroll();
+    
+    if (direction === 'next') {
+        galleryState.currentIndex++;
+        if (galleryState.currentIndex >= totalItems) {
+            galleryState.currentIndex = 0;
+            // Reset position without animation for seamless loop
+            galleryTrack.style.transition = 'none';
+            updateTransform();
+            galleryTrack.offsetHeight;
+            galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+    } else {
+        galleryState.currentIndex--;
+        if (galleryState.currentIndex < 0) {
+            galleryState.currentIndex = totalItems - 1;
+            // Reset position without animation for seamless loop
+            galleryTrack.style.transition = 'none';
+            updateTransform();
+            galleryTrack.offsetHeight;
+            galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+    }
+    
+    galleryState.isTransitioning = true;
+    updateTransform();
+    
+    setTimeout(() => {
+        galleryState.isTransitioning = false;
+        // Resume auto-scroll after 3 seconds
+        setTimeout(resumeAutoScroll, 3000);
+    }, 500);
+}
+
+function updateTransform() {
+    const galleryTrack = document.getElementById('galleryTrack');
+    if (!galleryTrack) return;
+    
+    const itemWidth = 420; // 400px + 20px gap
+    const translateX = -galleryState.currentIndex * itemWidth;
+    galleryTrack.style.transform = `translateX(${translateX}px)`;
+}
+
 function initializeGallery() {
     const galleryTrack = document.getElementById('galleryTrack');
     
@@ -252,13 +329,116 @@ function initializeGallery() {
     // Initial setup
     updateGalleryDirection();
     
-    // Optional: Add hover pause functionality
-    galleryTrack.addEventListener('mouseenter', () => {
-        galleryTrack.style.animationPlayState = 'paused';
+    // Mouse drag functionality
+    galleryTrack.addEventListener('mousedown', (e) => {
+        if (galleryState.isTransitioning) return;
+        
+        galleryState.isDragging = true;
+        galleryState.startX = e.clientX;
+        galleryState.initialTransform = -galleryState.currentIndex * 420;
+        pauseAutoScroll();
+        
+        galleryTrack.style.cursor = 'grabbing';
+        galleryTrack.style.transition = 'none';
+        
+        e.preventDefault();
     });
     
+    document.addEventListener('mousemove', (e) => {
+        if (!galleryState.isDragging) return;
+        
+        galleryState.currentX = e.clientX;
+        const deltaX = galleryState.currentX - galleryState.startX;
+        const newTransform = galleryState.initialTransform + deltaX;
+        
+        galleryTrack.style.transform = `translateX(${newTransform}px)`;
+    });
+    
+    document.addEventListener('mouseup', () => {
+        if (!galleryState.isDragging) return;
+        
+        galleryState.isDragging = false;
+        galleryTrack.style.cursor = 'grab';
+        galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        const deltaX = galleryState.currentX - galleryState.startX;
+        const threshold = 420 * 0.3; // 30% of item width
+        
+        if (Math.abs(deltaX) > threshold) {
+            if (deltaX > 0) {
+                moveToSlide('prev');
+            } else {
+                moveToSlide('next');
+            }
+        } else {
+            // Snap back to current position
+            updateTransform();
+            setTimeout(resumeAutoScroll, 2000);
+        }
+    });
+    
+    // Touch functionality
+    galleryTrack.addEventListener('touchstart', (e) => {
+        if (galleryState.isTransitioning) return;
+        
+        galleryState.isDragging = true;
+        galleryState.startX = e.touches[0].clientX;
+        galleryState.initialTransform = -galleryState.currentIndex * 420;
+        pauseAutoScroll();
+        
+        galleryTrack.style.transition = 'none';
+    }, { passive: false });
+    
+    galleryTrack.addEventListener('touchmove', (e) => {
+        if (!galleryState.isDragging) return;
+        
+        galleryState.currentX = e.touches[0].clientX;
+        const deltaX = galleryState.currentX - galleryState.startX;
+        const newTransform = galleryState.initialTransform + deltaX;
+        
+        galleryTrack.style.transform = `translateX(${newTransform}px)`;
+        e.preventDefault();
+    }, { passive: false });
+    
+    galleryTrack.addEventListener('touchend', () => {
+        if (!galleryState.isDragging) return;
+        
+        galleryState.isDragging = false;
+        galleryTrack.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        const deltaX = galleryState.currentX - galleryState.startX;
+        const threshold = 420 * 0.3; // 30% of item width
+        
+        if (Math.abs(deltaX) > threshold) {
+            if (deltaX > 0) {
+                moveToSlide('prev');
+            } else {
+                moveToSlide('next');
+            }
+        } else {
+            // Snap back to current position
+            updateTransform();
+            setTimeout(resumeAutoScroll, 2000);
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        if (e.key === 'ArrowLeft') {
+            moveToSlide('prev');
+        } else if (e.key === 'ArrowRight') {
+            moveToSlide('next');
+        }
+    });
+    
+    // Hover pause functionality
+    galleryTrack.addEventListener('mouseenter', pauseAutoScroll);
     galleryTrack.addEventListener('mouseleave', () => {
-        galleryTrack.style.animationPlayState = 'running';
+        if (!galleryState.autoScrollPaused) {
+            resumeAutoScroll();
+        }
     });
 }
 
