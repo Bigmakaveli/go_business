@@ -344,9 +344,6 @@ function initializeContactForm() {
         
         // Reset form
         form.reset();
-        
-        // Show success message
-        alert(translations[currentLang].messageSentSuccess);
     });
 }
 
