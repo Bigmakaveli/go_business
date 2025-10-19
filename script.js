@@ -336,8 +336,8 @@ function initializeContactForm() {
         }
         const encodedMessage = encodeURIComponent(whatsappMessage);
         
-        // WhatsApp API URL (you can replace with actual WhatsApp number)
-        const whatsappUrl = `https://wa.me/972501234567?text=${encodedMessage}`;
+        // WhatsApp API URL (send to the specified number)
+        const whatsappUrl = `https://wa.me/972544224615?text=${encodedMessage}`;
         
         // Open WhatsApp
         window.open(whatsappUrl, '_blank');
