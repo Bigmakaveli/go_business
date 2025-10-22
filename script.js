@@ -577,24 +577,31 @@ function initializeGallery() {
             autoSlideInterval = setInterval(() => {
                 if (isUserInteracting) return; // Don't slide if user is interacting
                 
-                // Move forward or backward based on direction
+                // Read actual current position and recompute bounds each tick
+                currentScrollPosition = galleryWrapper.scrollLeft;
+                const wrapperWidth = galleryWrapper.offsetWidth;
+                const maxScrollPosition = Math.max(0, galleryTrack.scrollWidth - wrapperWidth);
+                const threshold = 2; // px threshold near edges
                 const slideAmount = 2; // Mobile slide speed
-                currentScrollPosition += slideDirection * slideAmount;
                 
-                // Check if we've reached the end and need to reverse direction
-                if (currentScrollPosition >= maxScrollPosition) {
-                    currentScrollPosition = maxScrollPosition;
-                    slideDirection = -1; // Start sliding backward
-                } else if (currentScrollPosition <= 0) {
-                    currentScrollPosition = 0;
-                    slideDirection = 1; // Start sliding forward
-                }
+                // Compute next target within bounds
+                const target = Math.max(0, Math.min(maxScrollPosition, currentScrollPosition + slideDirection * slideAmount));
                 
                 // Smooth scroll to new position
                 galleryWrapper.scrollTo({
-                    left: currentScrollPosition,
+                    left: target,
                     behavior: 'smooth'
                 });
+                
+                // Update current position to target
+                currentScrollPosition = target;
+                
+                // Reverse direction when near edges
+                if (currentScrollPosition <= threshold) {
+                    slideDirection = 1;
+                } else if (currentScrollPosition >= maxScrollPosition - threshold) {
+                    slideDirection = -1;
+                }
             }, 100); // Update every 100ms for mobile
         }
         
