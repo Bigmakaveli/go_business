@@ -577,29 +577,49 @@ function initializeGallery() {
             autoSlideInterval = setInterval(() => {
                 if (isUserInteracting) return; // Don't slide if user is interacting
                 
-                // Read actual current position and recompute bounds each tick
-                currentScrollPosition = galleryWrapper.scrollLeft;
-                const wrapperWidth = galleryWrapper.offsetWidth;
-                const maxScrollPosition = Math.max(0, galleryTrack.scrollWidth - wrapperWidth);
-                const threshold = 2; // px threshold near edges
+                // Read live scroll metrics each tick
+                const rawLeft = galleryWrapper.scrollLeft;
+                const wrapperWidth = galleryWrapper.clientWidth;
+                const totalWidth = galleryTrack.scrollWidth;
+                const max = Math.max(0, totalWidth - wrapperWidth);
+                
+                // Detect RTL and normalize position across engines
+                const isRTL = getComputedStyle(galleryWrapper).direction === 'rtl';
+                const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+                const normalize = (raw) => {
+                    if (!isRTL) return clamp(raw, 0, max);
+                    // Firefox returns negative, Chrome/Safari often return positive with 0 at right edge
+                    if (raw < 0) return clamp(-raw, 0, max);          // negative scheme
+                    return clamp(max - raw, 0, max);                  // default positive scheme
+                };
+                const denormalize = (norm, rawSample) => {
+                    if (!isRTL) return norm;
+                    if (rawSample < 0) return -norm;                  // negative scheme
+                    return clamp(max - norm, 0, max);                 // default positive scheme
+                };
+                
+                const currentNorm = normalize(rawLeft);
+                
                 const slideAmount = 2; // Mobile slide speed
+                const threshold = 4;   // px threshold near edges
                 
-                // Compute next target within bounds
-                const target = Math.max(0, Math.min(maxScrollPosition, currentScrollPosition + slideDirection * slideAmount));
+                // Compute next normalized target within bounds
+                const targetNorm = clamp(currentNorm + slideDirection * slideAmount, 0, max);
                 
-                // Smooth scroll to new position
+                // Convert to raw left for this engine and scroll
+                const rawTarget = denormalize(targetNorm, rawLeft);
                 galleryWrapper.scrollTo({
-                    left: target,
+                    left: rawTarget,
                     behavior: 'smooth'
                 });
                 
-                // Update current position to target
-                currentScrollPosition = target;
+                // Update state using normalized axis
+                currentScrollPosition = targetNorm;
                 
                 // Reverse direction when near edges
                 if (currentScrollPosition <= threshold) {
                     slideDirection = 1;
-                } else if (currentScrollPosition >= maxScrollPosition - threshold) {
+                } else if (currentScrollPosition >= max - threshold) {
                     slideDirection = -1;
                 }
             }, 100); // Update every 100ms for mobile
@@ -612,7 +632,7 @@ function initializeGallery() {
             }
         }
         
-        // Touch interaction handling
+        // Touch/Pointer interaction handling
         let touchStartX = 0;
         let touchStartScrollLeft = 0;
         let isDragging = false;
@@ -632,13 +652,44 @@ function initializeGallery() {
         
         galleryWrapper.addEventListener('touchend', () => {
             isDragging = false;
-            // Resume auto-slide after a delay when user stops interacting
+            // Resume auto-slide after a short delay when user stops interacting
             setTimeout(() => {
                 isUserInteracting = false;
-                // Update current position based on actual scroll position
-                currentScrollPosition = galleryWrapper.scrollLeft;
+                // Update current position based on actual scroll position (normalized)
+                const dir = getComputedStyle(galleryWrapper).direction;
+                const isRTL = dir === 'rtl';
+                const wrapperWidthNow = galleryWrapper.clientWidth;
+                const maxNow = Math.max(0, galleryTrack.scrollWidth - wrapperWidthNow);
+                const rawNow = galleryWrapper.scrollLeft;
+                currentScrollPosition = !isRTL
+                    ? Math.max(0, Math.min(maxNow, rawNow))
+                    : (rawNow < 0
+                        ? Math.max(0, Math.min(maxNow, -rawNow))
+                        : Math.max(0, Math.min(maxNow, maxNow - rawNow)));
                 startMobileAutoSlide();
-            }, 2000); // Wait 2 seconds before resuming
+            }, 300); // Resume after 300ms
+        });
+
+        // Pointer events (covers touch/mouse/pen on supporting browsers)
+        galleryWrapper.addEventListener('pointerdown', () => {
+            isUserInteracting = true;
+            stopMobileAutoSlide();
+        });
+        galleryWrapper.addEventListener('pointerup', () => {
+            setTimeout(() => {
+                isUserInteracting = false;
+                const dir = getComputedStyle(galleryWrapper).direction;
+                const isRTL = dir === 'rtl';
+                const wrapperWidthNow = galleryWrapper.clientWidth;
+                const maxNow = Math.max(0, galleryTrack.scrollWidth - wrapperWidthNow);
+                const rawNow = galleryWrapper.scrollLeft;
+                currentScrollPosition = !isRTL
+                    ? Math.max(0, Math.min(maxNow, rawNow))
+                    : (rawNow < 0
+                        ? Math.max(0, Math.min(maxNow, -rawNow))
+                        : Math.max(0, Math.min(maxNow, maxNow - rawNow)));
+                startMobileAutoSlide();
+            }, 300);
         });
         
         // Mouse interaction handling for mobile (if mouse is used)
