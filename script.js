@@ -277,31 +277,8 @@ function updateMetaTags(lang) {
 }
 
 function handleGalleryLanguageChange() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    const scrollbarThumb = document.getElementById('scrollbarThumb');
-    
-    if (!galleryTrack) return;
-    
-    // Check if we're on desktop (scrollbar exists)
-    const isDesktop = scrollbarThumb && document.querySelector('.scrollbar-track');
-    
-    if (isDesktop) {
-        // For desktop, smoothly transition to maintain current position
-        // Add a smooth transition class temporarily
-        galleryTrack.style.transition = 'transform 0.3s ease-out';
-        
-        // Use requestAnimationFrame to ensure smooth transition
-        requestAnimationFrame(() => {
-            // The gallery will maintain its current position
-            // The CSS already handles RTL/LTR properly with direction: ltr !important
-            // Remove the transition after it completes
-            setTimeout(() => {
-                galleryTrack.style.transition = 'transform 0.1s ease-out';
-            }, 300);
-        });
-    } else {
-        // For mobile, no special handling needed as it uses native scrolling
-        // The CSS already handles the direction properly
+    if (window.__restartMarquee) {
+        window.__restartMarquee();
     }
 }
 
@@ -373,361 +350,111 @@ window.addEventListener('scroll', function() {
 
 // Gallery functionality
 function initializeGallery() {
-    const galleryTrack = document.getElementById('galleryTrack');
-    const galleryWrapper = document.querySelector('.gallery-wrapper');
-    const scrollbarThumb = document.getElementById('scrollbarThumb');
-    const scrollbarTrack = document.querySelector('.scrollbar-track');
-    
-    if (!galleryTrack || !galleryWrapper) return;
-    
-    // Check if we're on desktop (scrollbar exists)
-    const isDesktop = scrollbarThumb && scrollbarTrack;
-    
-    if (isDesktop) {
-        initializeDesktopGallery();
-    } else {
-        initializeMobileGallery();
-    }
-    
-    function initializeDesktopGallery() {
-        const itemWidth = 400 + 20; // item width + gap
-        let currentPosition = 0;
-        const galleryWrapper = document.querySelector('.gallery-wrapper');
-        const wrapperWidth = galleryWrapper.offsetWidth;
-        const totalContentWidth = galleryTrack.children.length * itemWidth;
-        const maxPosition = Math.max(0, totalContentWidth - wrapperWidth);
-        
-        // Check if we're in RTL mode
-        const isRTL = document.documentElement.getAttribute('dir') === 'rtl';
-        
-        // Ensure we don't exceed max position
-        currentPosition = Math.min(currentPosition, maxPosition);
-        
-        // Auto-slide variables
-        let autoSlideInterval;
-        let slideDirection = 1; // 1 for forward, -1 for backward
-        let isUserInteracting = false;
-        
-        // Scrollbar functionality
-        let isDragging = false;
-        let startX = 0;
-        let startLeft = 0;
-        
-        scrollbarThumb.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            isUserInteracting = true;
-            startX = e.clientX;
-            startLeft = currentPosition;
-            stopAutoSlide();
-            e.preventDefault();
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            
-            const deltaX = e.clientX - startX;
-            const trackWidth = scrollbarTrack.offsetWidth;
-            const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
-            const maxThumbPosition = trackWidth - thumbWidth;
-            
-            // Calculate new position based on mouse movement (same for both RTL and LTR)
-            const thumbPosition = Math.max(0, Math.min(maxThumbPosition, 
-                (startLeft / maxPosition) * maxThumbPosition + deltaX));
-            const percentage = thumbPosition / maxThumbPosition;
-            currentPosition = Math.max(0, Math.min(maxPosition, percentage * maxPosition));
-            
-            updateGalleryPosition();
-        });
-        
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            // Resume auto-slide after a delay when user stops interacting
-            setTimeout(() => {
-                isUserInteracting = false;
-                startAutoSlide();
-            }, 3000); // Wait 3 seconds before resuming
-        });
-        
-        // Scrollbar track click
-        scrollbarTrack.addEventListener('click', (e) => {
-            if (e.target === scrollbarTrack) {
-                isUserInteracting = true;
-                stopAutoSlide();
-                
-                const rect = scrollbarTrack.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const trackWidth = rect.width;
-                const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
-                const maxThumbPosition = trackWidth - thumbWidth;
-                
-                // Calculate position for thumb center (same for both RTL and LTR)
-                const thumbPosition = Math.max(0, Math.min(maxThumbPosition, 
-                    clickX - thumbWidth / 2));
-                
-                const percentage = thumbPosition / maxThumbPosition;
-                currentPosition = Math.max(0, Math.min(maxPosition, percentage * maxPosition));
-                
-                updateGalleryPosition();
-                
-                // Resume auto-slide after a delay
-                setTimeout(() => {
-                    isUserInteracting = false;
-                    startAutoSlide();
-                }, 3000);
-            }
-        });
-        
-        function updateGalleryPosition() {
-            // Clamp current position to valid range
-            currentPosition = Math.max(0, Math.min(currentPosition, maxPosition));
-            
-            // Move gallery to the left as we scroll (same for both RTL and LTR)
-            galleryTrack.style.transform = `translateX(-${currentPosition}px)`;
-            
-            // Update scrollbar thumb position (same for both RTL and LTR)
-            const trackWidth = scrollbarTrack.offsetWidth;
-            const thumbWidth = Math.max(20, (wrapperWidth / totalContentWidth) * trackWidth);
-            const maxThumbPosition = trackWidth - thumbWidth;
-            const percentage = maxPosition > 0 ? currentPosition / maxPosition : 0;
-            const thumbPosition = percentage * maxThumbPosition;
-            
-            scrollbarThumb.style.width = `${thumbWidth}px`;
-            scrollbarThumb.style.left = `${thumbPosition}px`;
-            scrollbarThumb.style.right = 'auto';
-            
-        }
-        
-        // Auto-slide functions
-        function startAutoSlide() {
-            if (autoSlideInterval) return; // Already running
-            
-            autoSlideInterval = setInterval(() => {
-                if (isUserInteracting) return; // Don't slide if user is interacting
-                
-                // Move forward or backward based on direction
-                const slideAmount = 1; // Slow slide speed
-                currentPosition += slideDirection * slideAmount;
-                
-                // Check if we've reached the end and need to reverse direction
-                if (currentPosition >= maxPosition) {
-                    currentPosition = maxPosition;
-                    slideDirection = -1; // Start sliding backward
-                } else if (currentPosition <= 0) {
-                    currentPosition = 0;
-                    slideDirection = 1; // Start sliding forward
-                }
-                
-                updateGalleryPosition();
-            }, 50); // Update every 50ms for smooth animation
-        }
-        
-        function stopAutoSlide() {
-            if (autoSlideInterval) {
-                clearInterval(autoSlideInterval);
-                autoSlideInterval = null;
-            }
-        }
-        
-        // Initialize position
-        updateGalleryPosition();
-        
-        // Start auto-slide
-        startAutoSlide();
-        
-        // Pause auto-slide on hover
-        galleryWrapper.addEventListener('mouseenter', () => {
-            isUserInteracting = true;
-            stopAutoSlide();
-        });
-        
-        galleryWrapper.addEventListener('mouseleave', () => {
-            setTimeout(() => {
-                isUserInteracting = false;
-                startAutoSlide();
-            }, 1000); // Wait 1 second before resuming
-        });
-    }
-    
-    function initializeMobileGallery() {
-        // Mobile gallery with auto-slide functionality
-        galleryWrapper.style.overflowX = 'auto';
-        galleryWrapper.style.overflowY = 'hidden';
-        galleryWrapper.style.webkitOverflowScrolling = 'touch';
-        
-        // Remove any desktop-specific styles
-        galleryTrack.style.transform = 'none';
-        galleryTrack.style.animation = 'none';
-        
-        // Mobile auto-slide variables
-        let autoSlideInterval;
-        let slideDirection = 1; // 1 for forward, -1 for backward
-        let isUserInteracting = false;
-        let currentScrollPosition = 0;
-        
-        // Calculate mobile dimensions
-        const itemWidth = 320 + 15; // mobile item width + gap
-        const totalContentWidth = galleryTrack.children.length * itemWidth;
-        const wrapperWidth = galleryWrapper.offsetWidth;
-        const maxScrollPosition = Math.max(0, totalContentWidth - wrapperWidth);
-        
-        // Auto-slide functions for mobile
-        function startMobileAutoSlide() {
-            if (autoSlideInterval) return; // Already running
-            
-            autoSlideInterval = setInterval(() => {
-                if (isUserInteracting) return; // Don't slide if user is interacting
-                
-                // Read live scroll metrics each tick
-                const rawLeft = galleryWrapper.scrollLeft;
-                const wrapperWidth = galleryWrapper.clientWidth;
-                const totalWidth = galleryTrack.scrollWidth;
-                const max = Math.max(0, totalWidth - wrapperWidth);
-                
-                // Detect RTL and normalize position across engines
-                const isRTL = getComputedStyle(galleryWrapper).direction === 'rtl';
-                const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-                const normalize = (raw) => {
-                    if (!isRTL) return clamp(raw, 0, max);
-                    // Firefox returns negative, Chrome/Safari often return positive with 0 at right edge
-                    if (raw < 0) return clamp(-raw, 0, max);          // negative scheme
-                    return clamp(max - raw, 0, max);                  // default positive scheme
-                };
-                const denormalize = (norm, rawSample) => {
-                    if (!isRTL) return norm;
-                    if (rawSample < 0) return -norm;                  // negative scheme
-                    return clamp(max - norm, 0, max);                 // default positive scheme
-                };
-                
-                const currentNorm = normalize(rawLeft);
-                
-                const slideAmount = 2; // Mobile slide speed
-                const threshold = 4;   // px threshold near edges
-                
-                // Compute next normalized target within bounds
-                const targetNorm = clamp(currentNorm + slideDirection * slideAmount, 0, max);
-                
-                // Convert to raw left for this engine and scroll
-                const rawTarget = denormalize(targetNorm, rawLeft);
-                galleryWrapper.scrollTo({
-                    left: rawTarget,
-                    behavior: 'smooth'
-                });
-                
-                // Update state using normalized axis
-                currentScrollPosition = targetNorm;
-                
-                // Reverse direction when near edges
-                if (currentScrollPosition <= threshold) {
-                    slideDirection = 1;
-                } else if (currentScrollPosition >= max - threshold) {
-                    slideDirection = -1;
-                }
-            }, 100); // Update every 100ms for mobile
-        }
-        
-        function stopMobileAutoSlide() {
-            if (autoSlideInterval) {
-                clearInterval(autoSlideInterval);
-                autoSlideInterval = null;
-            }
-        }
-        
-        // Touch/Pointer interaction handling
-        let touchStartX = 0;
-        let touchStartScrollLeft = 0;
-        let isDragging = false;
-        
-        galleryWrapper.addEventListener('touchstart', (e) => {
-            isUserInteracting = true;
-            stopMobileAutoSlide();
-            touchStartX = e.touches[0].clientX;
-            touchStartScrollLeft = galleryWrapper.scrollLeft;
-            isDragging = true;
-        });
-        
-        galleryWrapper.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            // Allow default touch scrolling behavior
-        });
-        
-        galleryWrapper.addEventListener('touchend', () => {
-            isDragging = false;
-            // Resume auto-slide after a short delay when user stops interacting
-            setTimeout(() => {
-                isUserInteracting = false;
-                // Update current position based on actual scroll position (normalized)
-                const dir = getComputedStyle(galleryWrapper).direction;
-                const isRTL = dir === 'rtl';
-                const wrapperWidthNow = galleryWrapper.clientWidth;
-                const maxNow = Math.max(0, galleryTrack.scrollWidth - wrapperWidthNow);
-                const rawNow = galleryWrapper.scrollLeft;
-                currentScrollPosition = !isRTL
-                    ? Math.max(0, Math.min(maxNow, rawNow))
-                    : (rawNow < 0
-                        ? Math.max(0, Math.min(maxNow, -rawNow))
-                        : Math.max(0, Math.min(maxNow, maxNow - rawNow)));
-                startMobileAutoSlide();
-            }, 300); // Resume after 300ms
-        });
+    // Continuous marquee: duplicate items and animate translateX with RTL normalization, pausing on hover/touch
+    const track = document.getElementById('galleryTrack');
+    const wrapper = document.querySelector('.gallery-wrapper');
+    if (!track || !wrapper) return;
 
-        // Pointer events (covers touch/mouse/pen on supporting browsers)
-        galleryWrapper.addEventListener('pointerdown', () => {
-            isUserInteracting = true;
-            stopMobileAutoSlide();
-        });
-        galleryWrapper.addEventListener('pointerup', () => {
-            setTimeout(() => {
-                isUserInteracting = false;
-                const dir = getComputedStyle(galleryWrapper).direction;
-                const isRTL = dir === 'rtl';
-                const wrapperWidthNow = galleryWrapper.clientWidth;
-                const maxNow = Math.max(0, galleryTrack.scrollWidth - wrapperWidthNow);
-                const rawNow = galleryWrapper.scrollLeft;
-                currentScrollPosition = !isRTL
-                    ? Math.max(0, Math.min(maxNow, rawNow))
-                    : (rawNow < 0
-                        ? Math.max(0, Math.min(maxNow, -rawNow))
-                        : Math.max(0, Math.min(maxNow, maxNow - rawNow)));
-                startMobileAutoSlide();
-            }, 300);
-        });
-        
-        // Mouse interaction handling for mobile (if mouse is used)
-        galleryWrapper.addEventListener('mousedown', () => {
-            isUserInteracting = true;
-            stopMobileAutoSlide();
-        });
-        
-        galleryWrapper.addEventListener('mouseup', () => {
-            setTimeout(() => {
-                isUserInteracting = false;
-                currentScrollPosition = galleryWrapper.scrollLeft;
-                startMobileAutoSlide();
-            }, 2000);
-        });
-        
-        // Pause auto-slide on hover (for devices that support hover)
-        galleryWrapper.addEventListener('mouseenter', () => {
-            isUserInteracting = true;
-            stopMobileAutoSlide();
-        });
-        
-        galleryWrapper.addEventListener('mouseleave', () => {
-            setTimeout(() => {
-                isUserInteracting = false;
-                currentScrollPosition = galleryWrapper.scrollLeft;
-                startMobileAutoSlide();
-            }, 1000);
-        });
-        
-        // Initialize position
-        currentScrollPosition = 0;
-        
-        // Start auto-slide after a short delay
-        setTimeout(() => {
-            startMobileAutoSlide();
-        }, 1000);
+    let prepared = false;
+    let originalCount = 0;
+    let contentWidth = 0;
+    let x = 0;
+    let rafId = null;
+    let running = false;
+    let isPaused = false;
+    let lastTs = 0;
+
+    const isRTL = () => document.documentElement.getAttribute('dir') === 'rtl';
+    const speedPerMs = 0.08; // px per ms (~4.8px @60fps)
+
+    function measure() {
+        // After duplication, one set equals half of total scroll width (includes gaps)
+        contentWidth = track.scrollWidth / 2;
+        if (contentWidth <= 0) return;
+        // Keep x in wrap range
+        if (x <= -contentWidth) x += contentWidth;
+        if (x >= 0) x -= contentWidth;
     }
+
+    function prepareOnce() {
+        if (prepared) return;
+        const children = Array.from(track.children);
+        originalCount = children.length;
+        const frag = document.createDocumentFragment();
+        children.forEach(node => {
+            const clone = node.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            frag.appendChild(clone);
+        });
+        track.appendChild(frag);
+        // Disable CSS transitions to avoid jitter; keep shadows/styles intact
+        track.style.transition = 'none';
+        track.style.willChange = 'transform';
+        prepared = true;
+        measure();
+    }
+
+    function step(ts) {
+        if (!running) return;
+        if (!lastTs) lastTs = ts;
+        const dt = ts - lastTs;
+        lastTs = ts;
+
+        if (!isPaused && contentWidth > 0) {
+            const dir = isRTL() ? 1 : -1; // RTL moves rightwards, LTR leftwards
+            x += dir * speedPerMs * dt;
+
+            if (x <= -contentWidth) x += contentWidth;
+            if (x >= 0) x -= contentWidth;
+
+            track.style.transform = `translateX(${x}px)`;
+        }
+        rafId = requestAnimationFrame(step);
+    }
+
+    function start() {
+        if (running) return;
+        prepareOnce();
+        running = true;
+        lastTs = 0;
+        rafId = requestAnimationFrame(step);
+    }
+
+    function stop() {
+        running = false;
+        lastTs = 0;
+        if (rafId) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+    }
+
+    function pause() { isPaused = true; }
+    function resumeDelayed() { setTimeout(() => { isPaused = false; }, 300); }
+
+    // Expose restart for language changes/resizes
+    window.__restartMarquee = () => {
+        measure();
+    };
+
+    // Pause/resume on interaction
+    wrapper.addEventListener('mouseenter', pause);
+    wrapper.addEventListener('mouseleave', resumeDelayed);
+    wrapper.addEventListener('pointerdown', pause);
+    wrapper.addEventListener('pointerup', resumeDelayed, { passive: true });
+    wrapper.addEventListener('touchstart', pause, { passive: true });
+    wrapper.addEventListener('touchend', resumeDelayed, { passive: true });
+
+    // Recalculate sizes on resize
+    window.addEventListener('resize', () => {
+        const prev = contentWidth;
+        measure();
+        if (prev && contentWidth) {
+            x = x % contentWidth;
+        }
+    });
+
+    start();
 }
 
 // Video functionality
